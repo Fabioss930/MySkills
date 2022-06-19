@@ -68,24 +68,32 @@ export const Button = styled.TouchableHighlight`
   align-items: center;
   justify-content: center;
 `;
-export const Retangulo = styled.View`
-  width: 2px;
-  height: 56px;
-  background: #ebebeb;
-`;
+export const Retangulo = styled.View``;
 
 export const Icon = styled.Image``;
-
-
+export const IconX = styled.Image``;
 
 export const TaskList = styled.View`
   width: 355px;
   height: 48px;
-  
+
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 `;
 
-export const ButtonDelete = styled.TouchableHighlight``;
+export const ButtonDelete = styled.TouchableHighlight`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 26px;
+  height: 26px;
+`;
+export const ButtonEdit = styled.TouchableHighlight`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 26px;
+  height: 26px;
+`;

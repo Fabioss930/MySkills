@@ -1,18 +1,31 @@
 import React, {useState} from 'react';
-import {StatusBar, StyleSheet, Text, View, FlatList, Alert} from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Alert,
+  TextInput,
+} from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import Icone from '../images/Path.png';
-import IconDelete from '../images/iconDelete.png';
+import IconDelete from '../images/delete.png';
+import IconEdit from '../images/Edit.png';
+import Rectangle from '../images/Rectangle.png';
+import X from '../images/X.png';
 import {
   Button,
   ButtonDelete,
+  ButtonEdit,
   Component,
   ComponentTitle,
   Header,
   Icon,
+  IconX,
   InputTask,
-  List,
   Qtd,
+  Retangulo,
   TaskList,
   Title,
   ViewAreaInput,
@@ -29,42 +42,87 @@ const Home: React.FC = () => {
     id: string;
     name: string;
     status: boolean;
+    editValue: boolean;
   }
 
   const [newValueInput, setNewValueInput] = useState('');
   const [valueInput, setvalueInput] = useState<TypeSkill[]>([]);
   const [contTask, setContTask] = useState(0);
+  const [inputEdit, setInputEdit] = useState('');
 
   const data = {
     id: String(new Date().getTime()),
     name: newValueInput,
     status: false,
+    editValue: false,
   };
 
   function handleChange() {
-    if (data.name) {
+    const nameTask = valueInput.map(task => task.name);
+
+    if (nameTask.toString() !== newValueInput) {
       setvalueInput(e => [...e, data]);
       setContTask(contTask + 1);
       setNewValueInput('');
     } else {
-      Alert.alert('Insira uma tarefa!');
+      Alert.alert(
+        'Tareja já cadastrada!',
+        'Você não pode cadastrar uma tarefa com o mesmo nome',
+      );
     }
   }
 
   function handleCheck(id: string) {
-    var temp = valueInput.map(item => {
-      if (item.id === id) {
-        return {...item, status: !item.status};
+    var temp = valueInput.map(task => {
+      if (task.id === id) {
+        return {...task, status: !task.status};
       }
-      return item;
+      return task;
+    });
+    setvalueInput(temp);
+  }
+
+  function handleEdit(id: string) {
+    var temp = valueInput.map(task => {
+      if (task.id === id) {
+        setInputEdit(task.name);
+        return {...task, editValue: !task.editValue};
+      }
+      return task;
     });
     setvalueInput(temp);
   }
 
   function handleDelete(id: string) {
-    const newValues = valueInput.filter(item => item.id !== id);
-    setvalueInput(newValues);
-    setContTask(contTask - 1);
+    function deleteTask() {
+      const newValues = valueInput.filter(item => item.id !== id);
+      setvalueInput(newValues);
+      setContTask(contTask - 1);
+    }
+
+    Alert.alert(
+      'Remover item',
+      'Tem certeza que você deseja remover esse item?',
+      [
+        {
+          text: 'Não',
+        },
+        {
+          text: 'Sim',
+          onPress: () => deleteTask(),
+        },
+      ],
+    );
+  }
+
+  function handleNewTask(id: string) {
+    var temp = valueInput.map(task => {
+      if (task.id === id) {
+        return {...task, name: inputEdit, editValue: !task.editValue};
+      }
+      return task;
+    });
+    setvalueInput(temp);
   }
 
   return (
@@ -78,7 +136,7 @@ const Home: React.FC = () => {
       <ViewAreaInput>
         <InputTask
           value={newValueInput}
-          placeholder="Adicionar uma Tarefa"
+          placeholder="Adicionar uma tarefa"
           onChangeText={setNewValueInput}
         />
 
@@ -98,14 +156,42 @@ const Home: React.FC = () => {
                 value={item.status}
                 onValueChange={() => handleCheck(item.id)}
               />
-              <Text style={item.status ? styles.TaskTextDone : styles.TaskText}>
-                {item.name}
-              </Text>
+              {!item.editValue ? (
+                <Text
+                  style={item.status ? styles.TaskTextDone : styles.TaskText}>
+                  {item.name}
+                </Text>
+              ) : (
+                <TextInput
+                  style={styles.TaskEdit}
+                  onChangeText={setInputEdit}
+                  value={inputEdit}
+                  autoFocus={true}
+                  returnKeyType="send"
+                  onSubmitEditing={() => handleNewTask(item.id)}
+                />
+              )}
             </View>
 
-            <ButtonDelete onPress={() => handleDelete(item.id)}>
-              <Icon source={IconDelete} />
-            </ButtonDelete>
+            <View style={styles.ContentButtons}>
+              <ButtonEdit
+                activeOpacity={0.6}
+                onPress={() => handleEdit(item.id)}>
+                {!item.editValue ? (
+                  <Icon source={IconEdit} />
+                ) : (
+                  <IconX source={X} />
+                )}
+              </ButtonEdit>
+              <Retangulo>
+                <Icon source={Rectangle} />
+              </Retangulo>
+              <ButtonDelete
+                activeOpacity={0.6}
+                onPress={() => handleDelete(item.id)}>
+                <Icon source={IconDelete} />
+              </ButtonDelete>
+            </View>
           </TaskList>
         )}
       />
@@ -126,10 +212,24 @@ const styles = StyleSheet.create({
     color: '#1DB863',
     textDecorationLine: 'line-through',
   },
+  TaskEdit: {
+    marginLeft: 10,
+
+    padding: 0,
+    fontSize: 14,
+  },
   CheckBoxTask: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+  },
+
+  ContentButtons: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+
+    width: 80,
   },
 
   CheckBoxStyle: {
